@@ -13,7 +13,7 @@ public class SlideActivityUtil {
     public static final int DISPLAY_HEIGHT = 1;
     public static final int DISPLAY_SIZE = 2;
 
-    public static final int ACTION_START_X = 3;
+    public static final float ACTION_START_X = 0.2f;
 
     public static int[] getDisplaySize(Context context){
         int[] display_size = new int[DISPLAY_SIZE];
@@ -28,11 +28,20 @@ public class SlideActivityUtil {
     }
 
     /**
+     * 获取屏幕开始滑动的计算位置
+     * @return
+     */
+    public static int getDisplayActionStartX(Context context, float x){
+        int[] display_size = getDisplaySize(context);
+        return (int)(display_size[DISPLAY_WIDTH] * x);
+    }
+
+    /**
      * 获取屏幕开始滑动的计算位置，初始为三分之一的屏幕
      * @return
      */
     public static int getDisplayActionStartX(Context context){
         int[] display_size = getDisplaySize(context);
-        return display_size[DISPLAY_WIDTH] / ACTION_START_X;
+        return getDisplayActionStartX(context, ACTION_START_X);
     }
 }

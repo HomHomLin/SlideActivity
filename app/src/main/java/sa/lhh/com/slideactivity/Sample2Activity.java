@@ -28,21 +28,27 @@ public class Sample2Activity extends Activity {
     private GestureDetector mGestureDetector;
     private int[] mDisplaySize;
 //    private LinearLayout.LayoutParams mLayoutParams;
-    private RelativeLayout mRlContent;
     private int verticalMinDistance = 20;
     private int minVelocity         = 0;
 //    private static final int ACTION_MOVE_LEFT = 1;
 //    private static final int ACTION_MOVE_RIGHT = 2;
     private static final int ACTION_MOVE = 3;
     private static final int ACTION_MOVE_UNKOWN = 0;
-    private int mActionEvent = 0;
+
+    private Window mWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample2);
 
-        mRlContent = (RelativeLayout)this.findViewById(R.id.rlContent);
+        mWindow = getWindow();
+
+        WindowManager.LayoutParams windowLayoutParams = mWindow.getAttributes(); // 获取对话框当前的参数值
+
+        windowLayoutParams.flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        windowLayoutParams.gravity = Gravity.LEFT;
+        mWindow.setAttributes(windowLayoutParams);
 
         mDisplaySize = SlideActivityUtil.getDisplaySize(this);
 
@@ -51,25 +57,32 @@ public class Sample2Activity extends Activity {
     }
 
     private void setActivityX(int x){
-        Display display = getWindowManager().getDefaultDisplay(); // 为获取屏幕宽、高
-        Window window = getWindow();
-        WindowManager.LayoutParams windowLayoutParams = window.getAttributes(); // 获取对话框当前的参数值
+//        Display display = getWindowManager().getDefaultDisplay(); // 为获取屏幕宽、高
+        WindowManager.LayoutParams windowLayoutParams = mWindow.getAttributes(); // 获取对话框当前的参数值
         windowLayoutParams.x = x + windowLayoutParams.x;
-        window.setBackgroundDrawable(new ColorDrawable(0xb0000000));//半透明,Color.argb(0, 0, 0, 0)
+//        window.setBackgroundDrawable(new ColorDrawable(0xb0000000));//半透明,Color.argb(0, 0, 0, 0)
 //        windowLayoutParams.alpha = 0.0f;// 设置透明度
 //        p.alpha = 1.0f;      //设置本身透明度
 //        windowLayoutParams.dimAmount = 0.0f;      //设置黑暗度
-        windowLayoutParams.flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-        windowLayoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-        window.setAttributes(windowLayoutParams);
+        mWindow.setAttributes(windowLayoutParams);
+    }
+
+    private void doGestureUp(){
+        WindowManager.LayoutParams windowLayoutParams = mWindow.getAttributes(); // 获取对话框当前的参数值
+        if(windowLayoutParams.x >= SlideActivityUtil.getDisplayActionStartX(this, 0.3f)){
+            this.finish();
+        }else{
+            setActivityX(-windowLayoutParams.x);
+        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        mGestureDetector.onTouchEvent(event);
-//        if(event.getAction() == MotionEvent.ACTION_MOVE){
-//            setActivityX((int)event.getX());
-//        }
+        if(event.getAction() != MotionEvent.ACTION_UP){
+            mGestureDetector.onTouchEvent(event);
+        }else{
+            doGestureUp();
+        }
         return super.onTouchEvent(event);
     }
 
@@ -79,7 +92,6 @@ public class Sample2Activity extends Activity {
 
         public boolean onDown(MotionEvent e) {
             // TODO Auto-generated method stub
-            mActionEvent = ACTION_MOVE;
 //            Log.i(TAG,"onDown");
             return false;
         }
@@ -92,8 +104,6 @@ public class Sample2Activity extends Activity {
 
         public boolean onSingleTapUp(MotionEvent e) {
             // TODO Auto-generated method stub
-            mActionEvent = ACTION_MOVE_UNKOWN;
-            mLastDisx = 0;
 //            Log.i(TAG,"onSingleTapUp");
             return false;
         }
@@ -101,13 +111,12 @@ public class Sample2Activity extends Activity {
         public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                 float distanceX, float distanceY) {
             // TODO Auto-generated method stub
-            if(e1.getX() < SlideActivityUtil.getDisplayActionStartX(Sample2Activity.this) && mLastDisx != -distanceX){
-                setActivityX(-(int)distanceX);
+            if(e1.getX() < SlideActivityUtil.getDisplayActionStartX(Sample2Activity.this) && Math.abs(distanceX) > 5){
+                setActivityX(-(int)(distanceX * 0.82));
             }
-            mLastDisx = (int)distanceX;
 //            if(e1.getX() < SlideActivityUtil.getDisplayActionStartX(Sample2Activity.this)){
 //                Log.i(TAG,String.valueOf((int)(e2.getX() - e1.getX())));
-                Log.i(TAG,"onScroll: e1: (x)" + e1.getX() + "(y)" + e1.getY() + ", e2: (x)" + e2.getX() + "(y)" + e2.getY() + ",disx : " + distanceX + " ,disy : " + distanceY);
+//                Log.i(TAG,"onScroll: e1: (x)" + e1.getX()+ ", e2: (x)" + e2.getX() + ",disx : " + distanceX );
 //                setActivityX((int)(e2.getX() - e1.getX()));
 //            }
             return false;
