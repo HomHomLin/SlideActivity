@@ -3,6 +3,8 @@ package sa.lhh.com.slideactivity;
 import android.app.Activity;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Display;
@@ -46,10 +48,10 @@ public class Sample2Activity extends Activity {
 
         WindowManager.LayoutParams windowLayoutParams = mWindow.getAttributes(); // 获取对话框当前的参数值
 
-        windowLayoutParams.flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        windowLayoutParams.flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
         windowLayoutParams.gravity = Gravity.LEFT;
 
-        windowLayoutParams.dimAmount = 1.0f;
+        windowLayoutParams.dimAmount = 0.5f;
         mWindow.setAttributes(windowLayoutParams);
 
         mDisplaySize = SlideActivityUtil.getDisplaySize(this);
@@ -60,7 +62,6 @@ public class Sample2Activity extends Activity {
 
     private void setActivityPosition(int x){
 //        Display display = getWindowManager().getDefaultDisplay(); // 为获取屏幕宽、高
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         WindowManager.LayoutParams windowLayoutParams = mWindow.getAttributes(); // 获取对话框当前的参数值
         if(x + windowLayoutParams.x < 0){
             //如果左拉已经到顶了就不该继续滑了
@@ -70,15 +71,21 @@ public class Sample2Activity extends Activity {
 //        window.setBackgroundDrawable(new ColorDrawable(0xb0000000));//半透明,Color.argb(0, 0, 0, 0)
 //        windowLayoutParams.alpha = 0.0f;// 设置透明度
 //        p.alpha = 1.0f;      //设置本身透明度
-        float screen_width = (float)SlideActivityUtil.getDisplaySize(this)[SlideActivityUtil.DISPLAY_WIDTH];
-        windowLayoutParams.dimAmount = windowLayoutParams.x / screen_width + 0.3f;
+//        float screen_width = (float)SlideActivityUtil.getDisplaySize(this)[SlideActivityUtil.DISPLAY_WIDTH];
+//        windowLayoutParams.dimAmount = windowLayoutParams.x / screen_width;
 
-        Log.i(TAG,"dim : " + windowLayoutParams.x + " screen : " + screen_width + "chu:" + windowLayoutParams.dimAmount);
+//        Log.i(TAG,"dim : " + windowLayoutParams.x + " screen : " + screen_width + "chu:" + windowLayoutParams.dimAmount);
         mWindow.setAttributes(windowLayoutParams);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 //        setActivityDim();
 
     }
+
+    Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            setActivityPosition(msg.arg1);
+        }
+    };
 
     /**
      * 设置黑暗度
@@ -137,6 +144,10 @@ public class Sample2Activity extends Activity {
                                 float distanceX, float distanceY) {
             // TODO Auto-generated method stub
             if(e1.getX() < SlideActivityUtil.getDisplayActionStartX(Sample2Activity.this) && Math.abs(distanceX) > 10){
+//                Message msg = mHandler.obtainMessage(1);
+//                msg.arg1 = -(int)(distanceX * 0.8);
+//                mHandler.sendMessageDelayed(msg,50);
+                //因为抖动所以会产生几个问题，包括右边界会出现灰条，window会跳动
                 setActivityPosition(-(int)(distanceX * 0.8));
             }
             return false;
