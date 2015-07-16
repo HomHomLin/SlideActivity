@@ -120,6 +120,9 @@ public class Sample2Activity extends Activity {
         return super.onTouchEvent(event);
     }
 
+    private long mLastTime;
+    private MotionEvent e2;//上一次移动到的位置,如果一丁时间内，反向未负
+
     class SlideGestureListener extends GestureDetector.SimpleOnGestureListener {
 
         public boolean onDown(MotionEvent e) {
@@ -143,12 +146,17 @@ public class Sample2Activity extends Activity {
         public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                 float distanceX, float distanceY) {
             // TODO Auto-generated method stub
-            if(e1.getX() < SlideActivityUtil.getDisplayActionStartX(Sample2Activity.this) && Math.abs(distanceX) > 10){
+            if(e1.getX() < SlideActivityUtil.getDisplayActionStartX(Sample2Activity.this)){
+//                && (System.currentTimeMillis() - mLastTime) > 100
+//                mLastTime = System.currentTimeMillis();
+//                mHandler.removeMessages(1);
+//                Log.i(TAG, "" + e2.getX());
 //                Message msg = mHandler.obtainMessage(1);
-//                msg.arg1 = -(int)(distanceX * 0.8);
-//                mHandler.sendMessageDelayed(msg,50);
+//                msg.arg1 = -(int)(distanceX * 0.7);
+//                mHandler.sendMessage(msg);
                 //因为抖动所以会产生几个问题，包括右边界会出现灰条，window会跳动
-                setActivityPosition(-(int)(distanceX * 0.8));
+                //需要提供一套比较稳定的算法来保证不跳动的问题
+                setActivityPosition(-(int)(distanceX * 0.7));
             }
             return false;
         }
